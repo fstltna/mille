@@ -20,10 +20,9 @@ my $CopyCommand = "/bin/cp";
 ###################################################
 
 my $Mille_ver = "1.0.0";
-my $TempDir = "/tmp";
 my $DEBUG_MODE = "off";
 my ($UserName) = @ARGV;
-my $CompletedResultCode = 15; # WHat will it return if the game ended
+my $CompletedResultCode = 15; # What will it return if the game ended
 
 # Create Help file if non-existant
 if (! -f $HelpFile)
@@ -186,7 +185,7 @@ while (-1)
 		PrintDebugCommand("$MilleGame");
 		my $ReturnCode = system("$MilleGame");
 		PrintDebugCommand("Return Value is '$ReturnCode'");
-		#if ($ReturnCode eq $CompletedResultCode)
+		if ($ReturnCode eq $CompletedResultCode)
 		{
 			# Returned our code that indicates we should process score
 			my $ElapsedTime = time() - $StartTime;
