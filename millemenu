@@ -21,7 +21,7 @@ my $CopyCommand = "/bin/cp";
 
 my $Mille_ver = "1.0.0";
 my $TempDir = "/tmp";
-my $DEBUG_MODE = "on";
+my $DEBUG_MODE = "off";
 my ($UserName) = @ARGV;
 my $CompletedResultCode = 15; # WHat will it return if the game ended
 
@@ -185,15 +185,12 @@ while (-1)
 		my $StartTime = time();
 		PrintDebugCommand("$MilleGame");
 		my $ReturnCode = system("$MilleGame");
-		print "Return Value is '$ReturnCode'\n";
-		print "Press Enter To Run This:";
-		my $entered = <STDIN>;
+		PrintDebugCommand("Return Value is '$ReturnCode'");
 		#if ($ReturnCode eq $CompletedResultCode)
 		{
 			# Returned our code that indicates we should process score
 			my $ElapsedTime = time() - $StartTime;
-			print "Elapsed Time is $ElapsedTime\n";
-			print "Press Enter To Run This:";
+			PrintDebugCommand("Elapsed Time is $ElapsedTime");
 			my $entered = <STDIN>;
 			ProcessScore($ElapsedTime);
 		}
