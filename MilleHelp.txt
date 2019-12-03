@@ -1,0 +1,8 @@
+One starts with six cards, and draws a new one before each turn (keeping the
+total seven). The object of the game is to first reach 700 miles, by playing
+cards with numbers. One can sabotage the opponent by playing cards like 'Speed
+Limit' and 'Accident', in which case he will have to use 'End of Limit' and
+'Repairs'. If he does not have these cards, or the appropriate protection card,
+he will have to discard a card instead of playing it until he gets one he can
+play.
+

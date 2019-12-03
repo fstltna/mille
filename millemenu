@@ -1,0 +1,213 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use UI::Dialog;
+use Term::ReadKey;
+use Term::ANSIScreen qw(cls);
+use POSIX qw(strftime);
+
+my $MILLEDIR = "/sbbs/doors/mille";
+my $MilleGame = "$MILLEDIR/mille";
+my $ScoreFile = "$MILLEDIR/scores.txt";
+my $HelpFile = "$MILLEDIR/MilleHelp.txt";
+my $ClearCommand = "/usr/bin/clear";
+my $TempScore = "/tmp/tempscore.txt";
+my $CopyCommand = "/bin/cp";
+
+###################################################
+# No changes below here
+###################################################
+
+my $Mille_ver = "1.0.0";
+my $TempDir = "/tmp";
+my $DEBUG_MODE = "on";
+my ($UserName) = @ARGV;
+my $CompletedResultCode = 15; # WHat will it return if the game ended
+
+# Create Help file if non-existant
+if (! -f $HelpFile)
+{
+	system("echo > $HelpFile");
+}
+# Create Score file if non-existant
+if (! -f $ScoreFile)
+{
+	system("echo > $ScoreFile");
+}
+
+my $d = new UI::Dialog ( backtitle => "Synchronet Mille Bournes v$Mille_ver", height => 20, width => 65, listheight => 5,
+	order => [ 'ascii', 'cdialog', 'xdialog' ]);
+
+my $windowtitle = "Welcome to the Synchronet BBS Management Console!";
+
+# $d->msgbox( title => $windowtitle, text => $introtext ); # ZZZ
+
+if (($d->state() eq "ESC") || ($d->state() eq "CANCEL"))
+{
+	exit 0;
+}
+
+my $menuselection = "";
+
+sub PrintDebugCommand
+{
+	if ($DEBUG_MODE eq "off")
+	{
+		return;
+	}
+	my $PassedString = shift;
+	print "About to run:\n$PassedString\n";
+	print "Press Enter To Run This:";
+	my $entered = <STDIN>;
+}
+
+sub DisplayFile
+{
+	my $PassedString = shift;
+	open INPUT, $PassedString;
+	undef $/;
+	my $content = <INPUT>;
+	close(INPUT);
+	$/ = "\n";
+	system("$ClearCommand");
+	print "$content\n";
+	print "\nPress Enter To Return To Menu:";
+	my $entered = <STDIN>;
+}
+
+sub DisplayScores
+{
+	system("$ClearCommand");
+	print "Minutes\tDate\t\t\t\tUser Name\n";
+	print "==================================================\n";
+	if (open(my $fh, '<', $ScoreFile))
+	{
+		while(my $row = <$fh>)
+		{
+			chomp $row;
+			#print "$row\n";
+			my ($time, $date, $username) = split /,/, $row;
+			print "$time\t$date\t$username\n";
+		}
+	}
+	else
+	{
+		print "Unable to read the score file...\n";
+	}
+	close(INPUT);
+	print "\nPress Enter To Return To Menu:";
+	my $entered = <STDIN>;
+}
+
+sub MainMenu
+{
+	system("$ClearCommand");
+	$menuselection = $d->menu( title => "Synchronet Mille Bournes", text => "Welcome to Mille, $UserName! - Select one:",
+                            list => [ '1', 'Play Game',
+                                      '2', 'Game Times',
+                                      '3', 'Help File',
+                                      'q', 'Quit SMC' ] );
+}
+
+sub ProcessScore
+{
+	my $PassedString = shift;
+	my $fh2;
+	# Create temp score list
+	if (open($fh2, '>', "$TempScore"))
+	{
+		PrintDebugCommand("Temp score file created");
+	}
+	else
+	{
+		print "\nUnable to open temp score file\nPress Enter To Return To Menu:";
+		my $entered = <STDIN>;
+		return;
+	}
+
+	# Have we seen our entry?
+	my $SawScore = 0;
+	my $NumScores = 0;
+	# Open up score list
+	if (open(my $fh, '<', $ScoreFile))
+	{
+		while((my $row = <$fh>) && ($NumScores <= 20))
+		{
+			chomp $row;
+			#print "$row\n";
+			my ($time, $date, $username) = split /,/, $row;
+			print "$time\t$date\t$username\n";
+			$NumScores += 1;
+			if ($time < $PassedString)
+			{
+				# Time ahead of score
+				print $fh2 "$time,$date,$username\n";
+			}
+			else
+			{
+				if ($SawScore == 0)
+				{
+					my $datestring = localtime();
+					# Time behind score
+					print $fh2 "$PassedString,$datestring,$UserName\n";
+					$SawScore = -1;
+					$NumScores += 1;
+				}
+				$NumScores += 1;
+				print $fh2 "$time,$date,$username\n";
+			}
+		}
+		close($fh);
+	}
+	else
+	{
+		print "\nUnable to open score file\nPress Enter To Return To Menu:";
+		my $entered = <STDIN>;
+	}
+	close($fh2);
+	if ($NumScores > 0)
+	{
+		system("$CopyCommand $TempScore $ScoreFile");
+	}
+}
+
+while (-1)
+{
+	system("$ClearCommand");
+	MainMenu();
+	if (($menuselection eq "CANCEL") || ($menuselection eq "ESC") || ($menuselection eq "") || ($menuselection eq "q") || ($menuselection eq "Q"))
+	{
+		exit 0;
+	}
+	elsif ($menuselection eq "1")
+	{
+		my $StartTime = time();
+		PrintDebugCommand("$MilleGame");
+		my $ReturnCode = system("$MilleGame");
+		print "Return Value is '$ReturnCode'\n";
+		print "Press Enter To Run This:";
+		my $entered = <STDIN>;
+		#if ($ReturnCode eq $CompletedResultCode)
+		{
+			# Returned our code that indicates we should process score
+			my $ElapsedTime = time() - $StartTime;
+			print "Elapsed Time is $ElapsedTime\n";
+			print "Press Enter To Run This:";
+			my $entered = <STDIN>;
+			ProcessScore($ElapsedTime);
+		}
+	}
+	elsif ($menuselection eq "2")
+	{
+		# Display scores
+		DisplayScores();
+	}
+	elsif ($menuselection eq "3")
+	{
+		# Display Help File
+		DisplayFile($HelpFile);
+	}
+}
+
+exit 0;
