@@ -22,7 +22,7 @@ my $CopyCommand = "/bin/cp";
 my $Mille_ver = "1.0.0";
 my $DEBUG_MODE = "off";
 my ($UserName) = @ARGV;
-my $CompletedResultCode = 15; # What will it return if the game ended
+my $CompletedResultCode = 3840; # What will it return if the game ended
 
 # Create Help file if non-existant
 if (! -f $HelpFile)
