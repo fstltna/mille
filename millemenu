@@ -119,7 +119,7 @@ sub MainMenu
                             list => [ '1', 'Play Game',
                                       '2', 'Game Times',
                                       '3', 'Help File',
-                                      'q', 'Quit SMC' ] );
+                                      'q', 'Quit MB' ] );
 }
 
 sub ProcessScore
