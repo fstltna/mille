@@ -1,4 +1,4 @@
-# Mille Bournes for Synchronet (1.0.0)
+# Mille Bournes for Synchronet (1.0.1)
 
 Play the classic card game against the computer and tracking the scores by players...
 
